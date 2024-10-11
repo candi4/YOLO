@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['finger']
+
+roboflow:
+  workspace: fingertip-detection-eiijf
+  project: finger-detection-via-sementation
+  version: 5
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/fingertip-detection-eiijf/finger-detection-via-sementation/dataset/5
