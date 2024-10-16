@@ -22,3 +22,4 @@ How to use YOLO
    ```python
    from ultralytics import YOLO
    ```
+   You can refer [ultralytics/predict](https://docs.ultralytics.com/modes/predict) documentation.
