@@ -6,7 +6,7 @@ from Utils.utils import root_dir
 model = YOLO("model/segment.pt")  # pretrained model
 
 # Run batched inference on a list of images
-results = model(f'{root_dir}/ezgif-6-13eb75ace9-jpg', stream=True)  # return a generator of Results objects
+results = model(f'{root_dir}/RawImage/ezgif-6-13eb75ace9-jpg', stream=True)  # return a generator of Results objects
 
 print(dir(results))
 
