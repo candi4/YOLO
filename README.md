@@ -31,10 +31,10 @@ How to use YOLO
    # Process results generator
    i = 0
    for result in results:
-      boxes = result.boxes  # Boxes object for bounding box outputs
       result.show()  # display to screen
       result.save(filename=f"result/result{i}.jpg")  # save to disk
    ```
-   * The `str` in `model` can be folder name or filename. The file can a video or an image.
+   * The `str` in `model` can be folder name or filename. The file can a video or an image. Refer to [ultralytics/predict#inference-sources](https://docs.ultralytics.com/modes/predict/#inference-sources).
    * If `stream` is false, it calculates at one time. Else, it calculates one time for one loop in `for result in results`.
    * You can refer [ultralytics/predict](https://docs.ultralytics.com/modes/predict) documentation.
+   * The description of attributes like `boxes.xyxy` can be found in [ultralytics/result](https://docs.ultralytics.com/reference/engine/results/).

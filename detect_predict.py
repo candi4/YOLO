@@ -3,7 +3,7 @@ import os
 from Utils.utils import root_dir
 
 # Load a model
-model = YOLO("detect.pt")  # pretrained model
+model = YOLO("model/detect.pt")  # pretrained model
 
 # Run batched inference on a list of images
 results = model(f'{root_dir}/ezgif-6-13eb75ace9-jpg', stream=True)  # return a generator of Results objects
@@ -11,16 +11,18 @@ results = model(f'{root_dir}/ezgif-6-13eb75ace9-jpg', stream=True)  # return a g
 # Process results generator
 i = 0
 for result in results:
-    boxes = result.boxes  # Boxes object for bounding box outputs
-    # result.show()  # display to screen
+    print(result.orig_img.shape)
+    
     os.makedirs("_result/detect", exist_ok=True)
     result.save(filename=f"_result/detect/result{i}.jpg")  # save to disk
+    
+    boxes = result.boxes  # Boxes object for bounding box outputs
     
     
     print(i)
     print(boxes.conf)
     print(boxes.xyxy)
-    boxes.conf.argmax(dim=None, keepdim=False) 
+    print(boxes.conf.argmax(dim=None, keepdim=False))
     
     
     print()

@@ -166,3 +166,6 @@ cython_debug/
 # YOLO
 *.cache
 runs
+
+# temporarily saved files
+_result/

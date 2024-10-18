@@ -3,7 +3,7 @@ from Utils.utils import root_dir
 
 
 # Load a model
-model = YOLO("yolo11n.pt")  # load a pretrained model (recommended for training)
+model = YOLO("yolo11n-seg.pt")  # load a pretrained model (recommended for training)
 # n s m l x
 
 # Train the model with GPUs
