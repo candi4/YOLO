@@ -38,8 +38,8 @@ def resize(img, scale):
 
     height, width = img.shape[:2]
 
-    new_width = width * scale
-    new_height = height * scale
+    new_width = int(width * scale)
+    new_height = int(height * scale)
 
     resized_img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
     return resized_img
@@ -102,27 +102,39 @@ def generate_yolo_label(yaml_path, img_width, img_height, x_center, y_center, ob
 
 if __name__ == "__main__":
     # Load background and object images
-    background = cv2.imread(r'C:\Users\82105\code_temp\YOLO\image_composite\background\ddca3f92-4b8e-4672-bb6b-f3594ad4e304.jpg', cv2.IMREAD_GRAYSCALE)
-    object_img = cv2.imread(r'C:\Users\82105\code_temp\YOLO\image_composite\object\(ry0)(rx0)(delx0.1).png', cv2.IMREAD_GRAYSCALE)
+    bg_filename = 'ddca3f92-4b8e-4672-bb6b-f3594ad4e304.jpg'
+    obj_filename = '(ry0)(rx0)(delx0.1).png'
+    background = cv2.imread(f"background/{bg_filename}", cv2.IMREAD_GRAYSCALE)
+    object_img = cv2.imread(f"object/{obj_filename}", cv2.IMREAD_GRAYSCALE)
 
+    # Set numbers
+    bg_scale=8.0
+    obj_scale=0.8
+    angle=np.random.uniform(0,360)
+    obj_range = np.array([[120,120],  # x1 y1
+                          [470,450]]) # x2 y2
+    obj_origin_range = obj_range.astype(float)
+    obj_origin_range[1] -= np.linalg.norm(object_img.shape[:2]) * (obj_scale/bg_scale)
+    obj_origin_range = obj_origin_range.astype(int)
+    x = int(np.random.uniform(*obj_origin_range[:,0]) * bg_scale)
+    y = int(np.random.uniform(*obj_origin_range[:,1]) * bg_scale)
+    # Verify the range
+    bg_range_img = cv2.rectangle(background.copy(), pt1=obj_range[0], pt2=obj_range[1], color=50, thickness=2)
+    bg_range_img = cv2.rectangle(bg_range_img, pt1=obj_origin_range[0], pt2=obj_origin_range[1], color=200, thickness=2)
+    cv2.imwrite(f'bg_range/{bg_filename}',bg_range_img)
 
-    x=600
-    y=1200
-    bg_scale=5
-    obj_scale=1
-    combined_img, background, object_img = overlay_image(background=background, bg_scale=bg_scale, object_img=object_img, obj_scale=obj_scale, x=x, y=y, angle=30,
-                                bg_weight=0.6, obj_weight=0.8, gamma=0)
+    # Combine images
+    combined_img, background, object_img = overlay_image(background=background, bg_scale=bg_scale, object_img=object_img, obj_scale=obj_scale, x=x, y=y, angle=angle,
+                                                         bg_weight=0.6, obj_weight=1.3, gamma=0.,
+                                                         )
+    
+    cv2.imwrite('combined_img.jpg',combined_img)
 
-    # Save combined image
-    cv2.imwrite("combined_image.png", combined_img)
+    # # YAML label generation
+    # yaml_data = generate_yolo_label(combined_img, bbox=)
 
-    # YAML Annotation generation
-    yaml_data = generate_yolo_label("combined_image.png", combined_img.shape[1], combined_img.shape[0],
-                                        x + (object_img.shape[1] // 2), y + (object_img.shape[0] // 2),
-                                        object_img.shape[1], object_img.shape[0])
-
-    # Save YAML
-    with open("yolo_annotation.yaml", "w") as file:
-        yaml.dump(yaml_data, file)
+    # # Save YAML
+    # with open("yolo_annotation.yaml", "w") as file:
+    #     yaml.dump(yaml_data, file)
 
     print("YAML file saved successfully!")
