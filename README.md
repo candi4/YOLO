@@ -1,7 +1,7 @@
 # YOLO
 How to use YOLO
 
-## How to train YOLO model
+## Train YOLO model
 1. Make image dataset using [roboflow](https://roboflow.com/) 
 2. Download dataset as `YOLOv8` format
 3. Install `ultralytics`, `cuda`, and `pytorch`
@@ -38,5 +38,9 @@ How to use YOLO
    * If `stream` is false, it calculates at one time. Else, it calculates one time for one loop in `for result in results`.
    * You can refer [ultralytics/predict](https://docs.ultralytics.com/modes/predict) documentation.
    * The description of attributes like `boxes.xyxy` can be found in [ultralytics/result](https://docs.ultralytics.com/reference/engine/results/).
-## How to generate training data
-`gen_data.py`
+## Generate training data
+`image_composite`
+[Object Detection Datasets Overview](https://docs.ultralytics.com/datasets/detect/)
+
+## Inspect data
+`detect_inspect`
