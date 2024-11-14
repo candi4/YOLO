@@ -38,3 +38,5 @@ How to use YOLO
    * If `stream` is false, it calculates at one time. Else, it calculates one time for one loop in `for result in results`.
    * You can refer [ultralytics/predict](https://docs.ultralytics.com/modes/predict) documentation.
    * The description of attributes like `boxes.xyxy` can be found in [ultralytics/result](https://docs.ultralytics.com/reference/engine/results/).
+## How to generate training data
+`gen_data.py`

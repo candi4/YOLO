@@ -167,5 +167,9 @@ cython_debug/
 *.cache
 runs
 
-# temporarily saved files
+# automatically saved files
 _result/
+
+# temporal files
+image_composite/background
+image_composite/object
