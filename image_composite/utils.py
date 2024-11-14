@@ -1,7 +1,7 @@
 import cv2
-import yaml
 import numpy as np
 import os
+import time
 
 
 def draw_bbox(img, bbox, color, thickness:int):
@@ -42,7 +42,7 @@ def fit_rotate(img, scale=1.0, angle=0):
 
     # Rotate the image
     M = cv2.getRotationMatrix2D((r,r), angle, scale)
-    rotated_img = cv2.warpAffine(translated_img, M, (int(2*r), int(2*r)), flags=cv2.INTER_LANCZOS4, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
+    rotated_img = cv2.warpAffine(translated_img, M, (int(2*r), int(2*r)), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
 
     cropped_img = crop_nonzero(rotated_img)
     return cropped_img
@@ -55,7 +55,7 @@ def resize(img, scale):
     new_width = int(width * scale)
     new_height = int(height * scale)
 
-    resized_img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LANCZOS4)
+    resized_img = cv2.resize(img, (new_width, new_height), interpolation=cv2.INTER_LINEAR)
     return resized_img
 
 
@@ -184,13 +184,19 @@ class GenYoloData():
 
 
 if __name__ == "__main__":
+    start_main = time.time()
     genyolo = GenYoloData(bg_filename='raw_images/background/ddca3f92-4b8e-4672-bb6b-f3594ad4e304.jpg',
                           obj_filename='raw_images/object/(ry0)(rx20)(delx0.1).png')
-    for i in range(10):
+    for i in range(3):
+        start_individual = time.time()
+        dataname = f'data{i}'
         genyolo.combine(bg_scale=8.0, obj_scale=0.8, obj_range=[[120,120],  # x1 y1
                                                                 [470,450]], # x2 y2
                         bg_weight=0.6, obj_weight=1.3, gamma=0.,
                         )
-        genyolo.save(directory='Dataset.yolo/unannotated/', dataname=f'data{i}')
+        genyolo.save(directory='Dataset.yolo/unannotated/', dataname=dataname)
+        print(f"{i}th data saved: {dataname}")
+        print("    Individual consumed time:", time.time()-start_individual)
 
-    print("YAML file saved successfully!")
+    print("YAML files saved successfully!")
+    print("Total consumed time:", time.time()-start_main)
