@@ -5,6 +5,8 @@ import numpy as np
 
 from utils import GenYoloData
 
+start_main = time.time()
+
 with open("parameters.yaml", "r") as file:
     params = yaml.safe_load(file)
 
@@ -24,8 +26,7 @@ else:
 obj_dir = params['obj_dir']
 obj_filenames = [path for path in os.listdir(obj_dir) if os.path.isfile(f"{obj_dir}/{path}")]
 
-data_order = 0
-while True:
+for data_order in range(10000):
     bg_filename = np.random.choice(list(params['background'].keys()))
     bg_config = params['background'][bg_filename]
     print(bg_filename)
@@ -33,7 +34,7 @@ while True:
     print(obj_filename)
     genyolo = GenYoloData(bg_filename=f'{bg_dir}/{bg_filename}',
                         obj_filename=f'{obj_dir}/{obj_filename}')
-    for i in range(3):
+    for i in range(1):
         start_individual = time.time()
         dataname = f'data{data_order}'
         genyolo.combine(bg_scale=bg_config['bg_scale'], obj_scale=bg_config['obj_scale'], obj_range=bg_config['obj_range'],
@@ -46,5 +47,5 @@ while True:
         print("    Individual consumed time:", time.time()-start_individual)
         data_order += 1
 
-print("YAML files saved successfully!")
+print("Generated dataset is saved successfully!")
 print("Total consumed time:", time.time()-start_main)
