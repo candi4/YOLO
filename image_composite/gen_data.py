@@ -8,10 +8,10 @@ from utils import GenYoloData
 with open("parameters.yaml", "r") as file:
     params = yaml.safe_load(file)
 
-# Lists the not used images
-bg_dir = 'raw_images/background/'
+# Print the not used images
+bg_dir = params['bg_dir']
 exist_bg_files = set([f"{bg_dir}/{path}" for path in os.listdir(bg_dir) if os.path.isfile(f"{bg_dir}/{path}")])
-using_bg_files = set([f"{bg_dir}/{path}" for path in params['bg_filenames']])
+using_bg_files = set([f"{bg_dir}/{path}" for path in params['background']])
 unused_bg_filenames = using_bg_files - exist_bg_files
 print("Unsed backgrounds:")
 if len(unused_bg_filenames) > 0:
@@ -20,14 +20,14 @@ if len(unused_bg_filenames) > 0:
 else:
     print("    Nothing")
 
-obj_dir = 'raw_images/object/'
+# Use every object images
+obj_dir = params['obj_dir']
 obj_filenames = [path for path in os.listdir(obj_dir) if os.path.isfile(f"{obj_dir}/{path}")]
-print(obj_filenames)
 
 data_order = 0
 while True:
-
-    bg_filename = np.random.choice(params['bg_filenames'])
+    bg_filename = np.random.choice(list(params['background'].keys()))
+    bg_config = params['background'][bg_filename]
     print(bg_filename)
     obj_filename = np.random.choice(obj_filenames)
     print(obj_filename)
@@ -36,11 +36,10 @@ while True:
     for i in range(3):
         start_individual = time.time()
         dataname = f'data{data_order}'
-        genyolo.combine(bg_scale=8.0, obj_scale=0.8, obj_range=[[120,120],  # x1 y1
-                                                                [470,450]], # x2 y2
-                        bg_weight=0.6, obj_weight=1.3, gamma=0.,
+        genyolo.combine(bg_scale=bg_config['bg_scale'], obj_scale=bg_config['obj_scale'], obj_range=bg_config['obj_range'],
+                        bg_weight=bg_config['bg_weight'], obj_weight=bg_config['obj_weight'], gamma=bg_config['gamma'],
                         )
-        crop_shape = np.random.randint(1500,2000,size=(2))
+        crop_shape = np.random.randint(*bg_config['crop_shape_range'], size=2)
         genyolo.crop(crop_shape=crop_shape)
         genyolo.save(directory='Dataset.yolo/unannotated/', dataname=dataname)
         print(f"{data_order}th data saved: {dataname}")
