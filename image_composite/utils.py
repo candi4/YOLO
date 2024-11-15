@@ -32,7 +32,7 @@ def crop_nonzero(arr):
     # Crop the rectangle
     return arr[top_left[0]:bottom_right[0], top_left[1]:bottom_right[1]]
 
-def random_crop(image, shape, bbox, crop_region):
+def random_crop(image, shape, bbox, crop_region=None):
     """Randomly crop a portion of the image while ensuring that the bounding box is included.
 
     Parameters
@@ -52,8 +52,12 @@ def random_crop(image, shape, bbox, crop_region):
     x_min, y_min = bbox[0]
     x_max, y_max = bbox[1]
 
-    crop_x_min, crop_y_min = crop_region[0]
-    crop_x_max, crop_y_max = crop_region[1]
+    if crop_region is None:
+        crop_x_min = crop_y_min = 0
+        crop_x_max, crop_y_max = img_w, img_h
+    else:
+        crop_x_min, crop_y_min = crop_region[0]
+        crop_x_max, crop_y_max = crop_region[1]
 
     # Calculate starting coordinates for cropping: Randomly select a point that includes the bounding box.
     # (0 <= crop_x_min <= x_start <= x_min) and (x_max <= x_start+crop_w <= crop_x_max <= img_w)
@@ -63,6 +67,7 @@ def random_crop(image, shape, bbox, crop_region):
     y_start_max = min(y_min, crop_y_max - crop_h, img_h - crop_h)
 
     if x_start_max < x_start_min or y_start_max < y_start_min:
+        print(f"{x_start_max} < {x_start_min} or {y_start_max} < {y_start_min}")
         raise ValueError("Bounding box is too large for the desired crop shape")
 
     x_start = random.randint(x_start_min, x_start_max)
@@ -222,10 +227,12 @@ class GenYoloData():
         self.bbox[0] = obj_origin
         self.bbox[1] = obj_origin + np.array(object_img.shape[:2][::-1])
 
+        # Verify the range
         if isinstance(regionimg_filename, str):
-            # Verify the range
-            bg_range_img = draw_bbox(background, bbox=obj_range, color=50, thickness=2)
-            bg_range_img = draw_bbox(bg_range_img, bbox=obj_origin_range, color=200, thickness=2)
+            bg_range_img = cv2.resize(combined_img.copy(), dsize=self.background.shape[::-1])
+            bg_range_img = draw_bbox(bg_range_img, bbox=obj_range, color=200, thickness=2)
+            bg_range_img = draw_bbox(bg_range_img, bbox=obj_origin_range, color=50, thickness=2)
+            os.makedirs(os.path.dirname(regionimg_filename), exist_ok=True)
             cv2.imwrite(regionimg_filename, bg_range_img)
         return self.combined_img
 
@@ -235,7 +242,7 @@ class GenYoloData():
         if self.combined_img is None or self.bbox is None:
             raise ValueError("Combined image or bounding box is not set.")
 
-        cropped_image, new_bbox = random_crop(image=self.combined_img, shape=crop_shape, bbox=self.bbox, crop_region=self.obj_range*self.bg_scale)
+        cropped_image, new_bbox = random_crop(image=self.combined_img, shape=crop_shape, bbox=self.bbox, ) #crop_region=self.obj_range*self.bg_scale)
         self.combined_img = cropped_image
         self.bbox = new_bbox
 

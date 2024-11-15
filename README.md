@@ -39,8 +39,19 @@ How to use YOLO
    * You can refer [ultralytics/predict](https://docs.ultralytics.com/modes/predict) documentation.
    * The description of attributes like `boxes.xyxy` can be found in [ultralytics/result](https://docs.ultralytics.com/reference/engine/results/).
 ## Generate training data
-`image_composite`
-[Object Detection Datasets Overview](https://docs.ultralytics.com/datasets/detect/)
+1. Move images into `image_composite/raw_images/background` and `image_composite/raw_images/object`.
+2. Write parameters into `image_composite/parameters.yaml`.
+3. Run `image_composite/parameter_test.py` while revising parameters. 
+   Whenever run the code, it automatically deletes `image_composite/test/`.
+   * `bg_scale`: Scale background image.
+   * `obj_scale`: Scale object image.
+   * `obj_range`: Area for object to be included in.
+   * `bg_weight`: Weight for background image in weighted sum.
+   * `obj_weight`: Weight for object image in weighted sum.
+   * `gamma`: 0-255 value to be added in weighted sum.
+   * `crop_shape_range`: The length of each side of the cropped image is randomly determined within this range. The smallest and largest images is saved in `image_composite\test\images`.
+* References:
+   * [Object Detection Datasets Overview](https://docs.ultralytics.com/datasets/detect/)
 
 ## Inspect data
 `detect_inspect`
