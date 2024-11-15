@@ -12,8 +12,8 @@ with open("parameters.yaml", "r") as file:
 bg_dir = params['bg_dir']
 exist_bg_files = set([f"{bg_dir}/{path}" for path in os.listdir(bg_dir) if os.path.isfile(f"{bg_dir}/{path}")])
 using_bg_files = set([f"{bg_dir}/{path}" for path in params['background']])
-unused_bg_filenames = using_bg_files - exist_bg_files
-print("Unsed backgrounds:")
+unused_bg_filenames = exist_bg_files - using_bg_files
+print("Unused backgrounds:")
 if len(unused_bg_filenames) > 0:
     for filename in list(unused_bg_filenames):
         print("   ",filename)
