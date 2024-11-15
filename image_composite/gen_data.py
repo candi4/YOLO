@@ -44,7 +44,7 @@ with tqdm(total=data_num) as pbar:
                             )
             crop_shape = np.random.randint(*bg_config['crop_shape_range'], size=2)
             genyolo.crop(crop_shape=crop_shape)
-            genyolo.save(directory='Dataset.yolo/unannotated/', dataname=dataname)
+            genyolo.save(directory='_Dataset.yolo/unannotated/', dataname=dataname)
             data_order += 1; pbar.update(1)
 
 print("Generated dataset is saved successfully!")

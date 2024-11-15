@@ -1,6 +1,9 @@
 import os
 import shutil
 import random
+import yaml
+
+from utils import root_dir
 
 
 def split_data(unannotated_data_dir, train_dir, val_dir, test_dir,
@@ -49,10 +52,18 @@ def split_data(unannotated_data_dir, train_dir, val_dir, test_dir,
     print(f"Total data is {dataset_size}")
 
 
-
-split_data(unannotated_data_dir='Dataset.yolo/unannotated', 
-           train_dir='Dataset.yolo/train', val_dir='Dataset.yolo/val', test_dir='Dataset.yolo/test',
+split_data(unannotated_data_dir='_Dataset.yolo/unannotated', 
+           train_dir='_Dataset.yolo/train', val_dir='_Dataset.yolo/val', test_dir='_Dataset.yolo/test',
            train_ratio=0.7, val_ratio=0.15, test_ratio=0.15)
 
 
+data = {
+    'path': os.path.join(root_dir, 'image_composite', '_Dataset.yolo'),
+    'train': 'train/images',
+    'val': 'val/images',
+    'test': 'test/images',
+    'names': ["Module"]
+}
 
+with open('_Dataset.yolo/data.yaml', 'w') as file:
+    yaml.dump(data, file, default_flow_style=False)
