@@ -2,6 +2,7 @@ import os
 import shutil
 import random
 import yaml
+from tqdm import tqdm
 
 from utils import root_dir
 
@@ -38,13 +39,13 @@ def split_data(unannotated_data_dir, train_dir, val_dir, test_dir,
     test_data = data[val_endindex:]
 
     # Copy files
-    for image, label in train_data:
+    for image, label in tqdm(train_data, desc='train_data'):
         os.rename(os.path.join(unannotated_data_dir, 'images', image), os.path.join(train_dir, 'images', image))
         os.rename(os.path.join(unannotated_data_dir, 'labels', label), os.path.join(train_dir, 'labels', label))
-    for image, label in val_data:
+    for image, label in tqdm(val_data, desc='val_data'):
         os.rename(os.path.join(unannotated_data_dir, 'images', image), os.path.join(val_dir, 'images', image))
         os.rename(os.path.join(unannotated_data_dir, 'labels', label), os.path.join(val_dir, 'labels', label))
-    for image, label in test_data:
+    for image, label in tqdm(test_data, desc='test_data'):
         os.rename(os.path.join(unannotated_data_dir, 'images', image), os.path.join(test_dir, 'images', image))
         os.rename(os.path.join(unannotated_data_dir, 'labels', label), os.path.join(test_dir, 'labels', label))
 
