@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 import time
+import random
 
 
 def draw_bbox(img, bbox, color, thickness:int):
@@ -31,6 +32,53 @@ def crop_nonzero(arr):
     # Crop the rectangle
     return arr[top_left[0]:bottom_right[0], top_left[1]:bottom_right[1]]
 
+def random_crop(image, shape, bbox, crop_region):
+    """Randomly crop a portion of the image while ensuring that the bounding box is included.
+
+    Parameters
+    ----------
+    - image
+    - bbox: Bounding box to be contained, in [[x_min, y_min], [x_max, y_max]] format.
+    - shape: Image shape (h, w) of return image.
+    - crop_region: The cropped image must be contained within this area. [[x_min, y_min], [x_max, y_max]]
+    Returns
+    -------
+    - cropped_image 
+    - new_bbox: New bounding box in the new image in [[x_min, y_min], [x_max, y_max]] format.
+    """
+    img_h, img_w = image.shape[:2]
+    crop_h, crop_w = shape[:2]
+
+    x_min, y_min = bbox[0]
+    x_max, y_max = bbox[1]
+
+    crop_x_min, crop_y_min = crop_region[0]
+    crop_x_max, crop_y_max = crop_region[1]
+
+    # Calculate starting coordinates for cropping: Randomly select a point that includes the bounding box.
+    # (0 <= crop_x_min <= x_start <= x_min) and (x_max <= x_start+crop_w <= crop_x_max <= img_w)
+    x_start_min = max(0, crop_x_min, x_max - crop_w)
+    x_start_max = min(x_min, crop_x_max - crop_w, img_w - crop_w)
+    y_start_min = max(0, crop_y_min, y_max - crop_h)
+    y_start_max = min(y_min, crop_y_max - crop_h, img_h - crop_h)
+
+    if x_start_max < x_start_min or y_start_max < y_start_min:
+        raise ValueError("Bounding box is too large for the desired crop shape")
+
+    x_start = random.randint(x_start_min, x_start_max)
+    y_start = random.randint(y_start_min, y_start_max)
+
+    # Obtain the cropped image
+    cropped_image = image[y_start:y_start + crop_h, x_start:x_start + crop_w]
+
+    # Calculate new bounding box coordinates
+    new_x_min = x_min - x_start
+    new_y_min = y_min - y_start
+    new_x_max = x_max - x_start
+    new_y_max = y_max - y_start
+    new_bbox = [[new_x_min, new_y_min], [new_x_max, new_y_max]]
+
+    return cropped_image, new_bbox
 
 def fit_rotate(img, scale=1.0, angle=0):
     # Translate the image
@@ -102,7 +150,7 @@ def create_yolo_label(image, bbox, image_filename, label_filename, class_id=0):
     Parameters
     ----------
     - image: The image array.
-    - bbox: Bounding box in (x_min, y_min, x_max, y_max) format.
+    - bbox: Bounding box in [[x_min, y_min], [x_max, y_max] format.
     - image_filename: File path to save the image.
     - label_filename: File path to save the label file.
     - class_id: Integer class ID for the object (default is 0).
@@ -133,15 +181,25 @@ class GenYoloData():
         self.obj_filename = obj_filename
         self.background = cv2.imread(bg_filename, cv2.IMREAD_GRAYSCALE)
         self.object_img = cv2.imread(obj_filename, cv2.IMREAD_GRAYSCALE)
-        assert self.background is not None, f"Wrong filename. bg_filename={bg_filename}"
-        assert self.object_img is not None, f"Wrong filename. obj_filename={obj_filename}"
+        assert self.background is not None, f"File not exist. bg_filename={bg_filename}"
+        assert self.object_img is not None, f"File not exist. obj_filename={obj_filename}"
         self.bbox = None
         self.combined_img = None
+        self.obj_range = None
+        self.bg_scale = None
 
     def combine(self, bg_scale, obj_scale, obj_range,
                 bg_weight, obj_weight, gamma,
                 regionimg_filename=None):
+        """
+
+        parameters
+        ----------
+        - obj_range: The range within which the object should be contained, in [[x1, y1], [x2, y2]] format.
+        """
         obj_range = np.array(obj_range, dtype=int)
+        self.obj_range = obj_range
+        self.bg_scale = bg_scale
 
         # Calculate variables
         obj_origin_range = obj_range.astype(float)
@@ -170,6 +228,17 @@ class GenYoloData():
             bg_range_img = draw_bbox(bg_range_img, bbox=obj_origin_range, color=200, thickness=2)
             cv2.imwrite(regionimg_filename, bg_range_img)
         return self.combined_img
+
+    def crop(self, crop_shape):
+        """Crop the combined image randomly while ensuring the bounding box is included.
+        """
+        if self.combined_img is None or self.bbox is None:
+            raise ValueError("Combined image or bounding box is not set.")
+
+        cropped_image, new_bbox = random_crop(image=self.combined_img, shape=crop_shape, bbox=self.bbox, crop_region=self.obj_range*self.bg_scale)
+        self.combined_img = cropped_image
+        self.bbox = new_bbox
+
     def save(self, directory, dataname, class_id=0):
         image_filename = directory + '/images/' + dataname + '.jpg'
         label_filename = directory + '/labels/' + dataname + '.txt'
@@ -180,6 +249,8 @@ class GenYoloData():
         create_yolo_label(image=self.combined_img, bbox=self.bbox, image_filename=image_filename, label_filename=label_filename, class_id=class_id)
         self.bbox = None
         self.combined_img = None
+        self.obj_range = None
+        self.bg_scale = None
 
 
 
@@ -194,6 +265,8 @@ if __name__ == "__main__":
                                                                 [470,450]], # x2 y2
                         bg_weight=0.6, obj_weight=1.3, gamma=0.,
                         )
+        crop_shape = np.random.randint(1500,2000,size=(2))
+        genyolo.crop(crop_shape=crop_shape)
         genyolo.save(directory='Dataset.yolo/unannotated/', dataname=dataname)
         print(f"{i}th data saved: {dataname}")
         print("    Individual consumed time:", time.time()-start_individual)
