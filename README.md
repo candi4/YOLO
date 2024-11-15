@@ -50,7 +50,9 @@ How to use YOLO
    * `obj_weight`: Weight for object image in weighted sum.
    * `gamma`: 0-255 value to be added in weighted sum.
    * `crop_shape_range`: The length of each side of the cropped image is randomly determined within this range. The smallest and largest images is saved in `image_composite\test\images`.
-4. Run `split_data.py` to split dataset into train, validate, test dataset.
+4. Run `gen_data.py` to generate dataset.
+5. Run `split_data.py` to split dataset into train, validate, test dataset.
+6. Run `detect_train.py` after revising it.
 * References:
    * [Object Detection Datasets Overview](https://docs.ultralytics.com/datasets/detect/)
 
