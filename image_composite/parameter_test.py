@@ -6,7 +6,9 @@ import shutil
 
 from utils import GenYoloData
 
-shutil.rmtree('test/')
+output_dir = '_samples/'
+if os.path.exists(output_dir):
+    shutil.rmtree(output_dir)
 
 with open("parameters.yaml", "r") as file:
     params = yaml.safe_load(file)
@@ -30,12 +32,12 @@ for bg_filename in params['background'].keys():
 
         genyolo.combine(bg_scale=bg_config['bg_scale'], obj_scale=bg_config['obj_scale'], obj_range=bg_config['obj_range'],
                         bg_weight=bg_config['bg_weight'], obj_weight=bg_config['obj_weight'], gamma=bg_config['gamma'],
-                        regionimg_filename=f'test/region/{bg_filename}'
+                        regionimg_filename=f'{output_dir}/region/{bg_filename}'
                         )
 
         crop_shape = bg_config['crop_shape_range']
         genyolo.crop(crop_shape=np.ones(2, dtype=int)*crop_shape[i])
         
-        genyolo.save(directory='test/', dataname=dataname)
+        genyolo.save(directory=output_dir, dataname=dataname)
 
 print("Done!!!")
