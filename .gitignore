@@ -171,7 +171,6 @@ runs
 _result/
 _samples/
 image_composite/_Dataset.yolo/
-image_composite/Dataset.yolo/
 
 # temporal files
 image_composite/raw_images/object/
