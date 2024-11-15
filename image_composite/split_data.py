@@ -3,41 +3,56 @@ import shutil
 import random
 
 
+def split_data(unannotated_data_dir, train_dir, val_dir, test_dir,
+               train_ratio, val_ratio, test_ratio):
+    """
 
+    Parameters
+    ----------
+    - unannotated_data_dir: unannotated_data_dir/images, unannotated_data_dir/labels
+    - train_ratio + val_ratio + test_ratio = 1
+    """
+    os.makedirs(os.path.join(train_dir, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(train_dir, 'labels'), exist_ok=True)
+    os.makedirs(os.path.join(val_dir, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(val_dir, 'labels'), exist_ok=True)
+    os.makedirs(os.path.join(test_dir, 'images'), exist_ok=True)
+    os.makedirs(os.path.join(test_dir, 'labels'), exist_ok=True)
 
-
-
-def split_yolo_data(source_dir, train_ratio=0.7, val_ratio=0.15, test_ratio=0.15):
-    # 디렉토리 생성
-    os.makedirs(os.path.join(source_dir, 'train'), exist_ok=True)
-    os.makedirs(os.path.join(source_dir, 'val'), exist_ok=True)
-    os.makedirs(os.path.join(source_dir, 'test'), exist_ok=True)
-
-    # 이미지 및 라벨 파일 목록 가져오기
-    images = [f for f in os.listdir(source_dir) if f.endswith('.jpg') or f.endswith('.png')]
-    labels = [f.replace('.jpg', '.txt').replace('.png', '.txt') for f in images]
-
-    # 이미지와 라벨 쌍을 섞기
+    images = os.listdir(os.path.join(unannotated_data_dir, 'images'))
+    labels = [os.path.splitext(f)[0]+'.txt' for f in images]
+    
+    # Shuffle
     data = list(zip(images, labels))
     random.shuffle(data)
 
-    # 데이터 분할
-    total = len(data)
-    train_end = int(total * train_ratio)
-    val_end = train_end + int(total * val_ratio)
+    # Split
+    dataset_size = len(data)
+    train_endindex = int(dataset_size * train_ratio)
+    val_endindex = train_endindex + int(dataset_size * val_ratio)
+    train_data = data[:train_endindex]
+    val_data = data[train_endindex:val_endindex]
+    test_data = data[val_endindex:]
 
-    train_data = data[:train_end]
-    val_data = data[train_end:val_end]
-    test_data = data[val_end:]
-
-    # 파일 복사
-    for dataset, name in zip([train_data, val_data, test_data], ['train', 'val', 'test']):
-        for img, lbl in dataset:
-            shutil.copy(os.path.join(source_dir, img), os.path.join(source_dir, name, img))
-            shutil.copy(os.path.join(source_dir, lbl), os.path.join(source_dir, name, lbl))
+    # Copy files
+    for image, label in train_data:
+        os.rename(os.path.join(unannotated_data_dir, 'images', image), os.path.join(train_dir, 'images', image))
+        os.rename(os.path.join(unannotated_data_dir, 'labels', label), os.path.join(train_dir, 'labels', label))
+    for image, label in val_data:
+        os.rename(os.path.join(unannotated_data_dir, 'images', image), os.path.join(val_dir, 'images', image))
+        os.rename(os.path.join(unannotated_data_dir, 'labels', label), os.path.join(val_dir, 'labels', label))
+    for image, label in test_data:
+        os.rename(os.path.join(unannotated_data_dir, 'images', image), os.path.join(test_dir, 'images', image))
+        os.rename(os.path.join(unannotated_data_dir, 'labels', label), os.path.join(test_dir, 'labels', label))
 
     print(f"Data split into {len(train_data)} train, {len(val_data)} val, and {len(test_data)} test samples.")
+    print(f"Total data is {dataset_size}")
 
-# 사용 예시
-source_directory = 'path_to_your_yolo_dataset'  # YOLO 데이터셋 경로
-split_yolo_data(source_directory)
+
+
+split_data(unannotated_data_dir='Dataset.yolo/unannotated', 
+           train_dir='Dataset.yolo/train', val_dir='Dataset.yolo/val', test_dir='Dataset.yolo/test',
+           train_ratio=0.7, val_ratio=0.15, test_ratio=0.15)
+
+
+
