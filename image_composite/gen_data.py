@@ -3,6 +3,7 @@ import time
 import os
 import numpy as np
 from tqdm import tqdm
+import shutil
 
 from utils import GenYoloData
 
@@ -28,8 +29,13 @@ obj_dir = params['obj_dir']
 obj_filenames = [path for path in os.listdir(obj_dir) if os.path.isfile(f"{obj_dir}/{path}")]
 
 
-data_num = 100_000
+if os.path.exists('_Dataset.yolo/unannotated/'):
+    shutil.rmtree('_Dataset.yolo/unannotated/')
+
+data_num = 1_000
 with tqdm(total=data_num) as pbar:
+    obj_dir = params['obj_dir']
+    obj_filenames = [path for path in os.listdir(obj_dir) if os.path.isfile(f"{obj_dir}/{path}")]
     data_order = 0
     while data_order < data_num:
         bg_filename = np.random.choice(list(params['background'].keys()))
@@ -37,7 +43,7 @@ with tqdm(total=data_num) as pbar:
         obj_filename = np.random.choice(obj_filenames)
         genyolo = GenYoloData(bg_filename=f'{bg_dir}/{bg_filename}',
                             obj_filename=f'{obj_dir}/{obj_filename}')
-        for i in range(10):
+        for i in range(1):
             dataname = f'data{data_order}'
             genyolo.combine(bg_scale=bg_config['bg_scale'], obj_scale=bg_config['obj_scale'], obj_range=bg_config['obj_range'],
                             bg_weight=bg_config['bg_weight'], obj_weight=bg_config['obj_weight'], gamma=bg_config['gamma'],
