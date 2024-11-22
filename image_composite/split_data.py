@@ -70,7 +70,9 @@ with open('_Dataset.yolo/data.yaml', 'w') as file:
 
 test_data = {
     'path': os.path.join(root_dir, 'image_composite', '_Dataset.yolo'),
+    'train': 'train/images',
     'val': 'test/images',
+    'test': 'test/images',
     'names': ["Module"]
 }
 with open('_Dataset.yolo/testdata.yaml', 'w') as file:
