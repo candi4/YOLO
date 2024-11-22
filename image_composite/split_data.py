@@ -65,6 +65,13 @@ data = {
     'test': 'test/images',
     'names': ["Module"]
 }
-
 with open('_Dataset.yolo/data.yaml', 'w') as file:
+    yaml.dump(data, file, default_flow_style=False)
+
+test_data = {
+    'path': os.path.join(root_dir, 'image_composite', '_Dataset.yolo'),
+    'val': 'test/images',
+    'names': ["Module"]
+}
+with open('_Dataset.yolo/testdata.yaml', 'w') as file:
     yaml.dump(data, file, default_flow_style=False)
