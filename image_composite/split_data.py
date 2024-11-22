@@ -74,4 +74,4 @@ test_data = {
     'names': ["Module"]
 }
 with open('_Dataset.yolo/testdata.yaml', 'w') as file:
-    yaml.dump(data, file, default_flow_style=False)
+    yaml.dump(test_data, file, default_flow_style=False)
