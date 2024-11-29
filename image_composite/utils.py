@@ -4,6 +4,8 @@ import os
 import time
 import random
 
+# <YOLO>/image_composite/../
+root_dir = os.path.dirname(os.path.abspath(__file__))+"/../"
 
 def draw_bbox(img, bbox, color, thickness:int):
     """

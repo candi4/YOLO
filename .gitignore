@@ -169,7 +169,8 @@ runs
 
 # automatically saved files
 _result/
+_samples/
+image_composite/_Dataset.yolo/
 
 # temporal files
-image_composite/background
-image_composite/object
+image_composite/raw_images/object/
